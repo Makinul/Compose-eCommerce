@@ -1,19 +1,22 @@
-package com.makinul.bs23104
+package com.makinul.bs23104.ui.home.details
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import com.makinul.bs23104.databinding.FragmentFirstBinding
+import com.makinul.bs23104.R
+import com.makinul.bs23104.databinding.FragmentDetailsBinding
+import dagger.hilt.android.AndroidEntryPoint
 
 /**
- * A simple [Fragment] subclass as the default destination in the navigation.
+ * A simple [androidx.fragment.app.Fragment] subclass as the second destination in the navigation.
  */
-class FirstFragment : Fragment() {
+@AndroidEntryPoint
+class SecondFragment : Fragment() {
 
-    private var _binding: FragmentFirstBinding? = null
+    private var _binding: FragmentDetailsBinding? = null
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -24,17 +27,13 @@ class FirstFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
 
-        _binding = FragmentFirstBinding.inflate(inflater, container, false)
+        _binding = FragmentDetailsBinding.inflate(inflater, container, false)
         return binding.root
-
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.buttonFirst.setOnClickListener {
-            findNavController().navigate(R.id.action_FirstFragment_to_SecondFragment)
-        }
     }
 
     override fun onDestroyView() {
