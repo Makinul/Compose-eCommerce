@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/item_margin"
+    app:cardCornerRadius="@dimen/card_corner_radius"
+    app:cardElevation="@dimen/card_elevation">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/item_padding">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/productImageView"
+            android:layout_width="@dimen/product_image_width"
+            android:layout_height="@dimen/product_image_height"
+            android:scaleType="centerCrop"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:srcCompat="@tools:sample/avatars" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/productTitleTextView"
+            style="@style/TextAppearance.AppCompat.Medium"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/text_margin_start"
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:textColor="@color/text_primary"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/productImageView"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Essence Mascara Lash Princess" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/productBrandTextView"
+            style="@style/TextAppearance.AppCompat.Small"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/text_margin_start"
+            android:layout_marginTop="@dimen/text_margin_top_small"
+            android:textColor="@color/text_secondary"
+            app:layout_constraintStart_toEndOf="@id/productImageView"
+            app:layout_constraintTop_toBottomOf="@id/productTitleTextView"
+            tools:text="Essence" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/productPriceTextView"
+            style="@style/TextAppearance.AppCompat.Medium"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/text_margin_start"
+            android:layout_marginTop="@dimen/text_margin_top"
+            android:textColor="@color/price_color"
+            app:layout_constraintStart_toEndOf="@id/productImageView"
+            app:layout_constraintTop_toBottomOf="@id/productBrandTextView"
+            tools:text="$9.99" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/productDiscountTextView"
+            style="@style/TextAppearance.AppCompat.Small"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/text_margin_small"
+            android:background="@drawable/discount_background"
+            android:paddingHorizontal="@dimen/padding_small"
+            android:textColor="@color/discount_text_color"
+            app:layout_constraintBottom_toBottomOf="@id/productPriceTextView"
+            app:layout_constraintStart_toEndOf="@id/productPriceTextView"
+            tools:text="-10.48%" />
+
+        <RatingBar
+            android:id="@+id/productRatingBar"
+            style="@style/Widget.AppCompat.RatingBar.Small"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/text_margin_start"
+            android:layout_marginTop="@dimen/text_margin_top"
+            android:isIndicator="true"
+            android:numStars="5"
+            android:rating="2.56"
+            android:stepSize="0.1"
+            android:theme="@style/RatingBarColor"
+            app:layout_constraintStart_toEndOf="@id/productImageView"
+            app:layout_constraintTop_toBottomOf="@id/productPriceTextView" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/productRatingTextView"
+            style="@style/TextAppearance.AppCompat.Caption"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/text_margin_small"
+            android:textColor="@color/text_secondary"
+            app:layout_constraintBottom_toBottomOf="@id/productRatingBar"
+            app:layout_constraintStart_toEndOf="@id/productRatingBar"
+            app:layout_constraintTop_toTopOf="@id/productRatingBar"
+            tools:text="(2.56)" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/productAvailabilityTextView"
+            style="@style/TextAppearance.AppCompat.Caption"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/text_margin_top_small"
+            android:textColor="@color/availability_in_stock"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/productImageView"
+            tools:text="@string/in_stock" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/productCategoryTextView"
+            style="@style/TextAppearance.AppCompat.Caption"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/text_margin_large"
+            android:textColor="@color/text_secondary"
+            app:layout_constraintStart_toEndOf="@id/productAvailabilityTextView"
+            app:layout_constraintTop_toTopOf="@id/productAvailabilityTextView"
+            tools:text="Beauty" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.cardview.widget.CardView>
