@@ -1,5 +1,6 @@
 package com.makinul.bs23104.data.model
 
+import android.os.Message
 import com.google.gson.annotations.SerializedName
 
 data class Product(
@@ -28,10 +29,12 @@ data class Product(
     val thumbnail: String
 ) {
     var key = -1
+    var message = ""
 
     // Secondary constructor that takes only the most common fields.
     constructor(
-        key: Int
+        key: Int,
+        message: String
     ) : this(
         id = -1,
         title = "",

@@ -71,8 +71,14 @@ class HomeFragment : Fragment() {
                             binding.statusLay.root.visible()
                             binding.statusLay.statusMessage.text = it.message
                         } else {
-
+                            items.add(
+                                Product(
+                                    key = AppConstants.KEY_FOOTER,
+                                    message = getString(R.string.loading)
+                                )
+                            )
                         }
+                        adapter.notifyDataSetChanged()
                     }
 
                     Data.Loading -> {
@@ -91,11 +97,21 @@ class HomeFragment : Fragment() {
                         if (data.products.isNotEmpty()) {
                             if (items.isEmpty()) {
                                 items.addAll(data.products)
-                                items.add(Product(key = AppConstants.KEY_FOOTER))
+                                items.add(
+                                    Product(
+                                        key = AppConstants.KEY_FOOTER,
+                                        message = getString(R.string.loading)
+                                    )
+                                )
                             } else {
                                 items.removeAt(items.lastIndex)
                                 items.addAll(data.products)
-                                items.add(Product(key = AppConstants.KEY_FOOTER))
+                                items.add(
+                                    Product(
+                                        key = AppConstants.KEY_FOOTER,
+                                        message = getString(R.string.loading)
+                                    )
+                                )
                             }
                         }
                         adapter.notifyDataSetChanged()
