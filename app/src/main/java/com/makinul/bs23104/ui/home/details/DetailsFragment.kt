@@ -5,8 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.findNavController
-import com.makinul.bs23104.R
 import com.makinul.bs23104.databinding.FragmentDetailsBinding
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -14,7 +12,7 @@ import dagger.hilt.android.AndroidEntryPoint
  * A simple [androidx.fragment.app.Fragment] subclass as the second destination in the navigation.
  */
 @AndroidEntryPoint
-class SecondFragment : Fragment() {
+class DetailsFragment : Fragment() {
 
     private var _binding: FragmentDetailsBinding? = null
 

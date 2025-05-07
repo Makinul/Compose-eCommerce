@@ -117,8 +117,10 @@ class ProductAdapter(
             val product = list[position]
 
             // Load the image using Glide
-            Glide.with(itemView.context)
-                .load(product.thumbnail) // Use thumbnail for better performance in a list
+            Glide.with(context)
+                .load(product.thumbnail)
+                .placeholder(R.drawable.image_search)
+                .error(R.drawable.image_not_found)
                 .into(binding.productImageView)
 
             binding.productTitleTextView.text = product.title
@@ -135,12 +137,19 @@ class ProductAdapter(
             binding.productRatingTextView.text =
                 "(${String.format("%.2f", product.rating)})" //show 2 decimal points
 
-            binding.productAvailabilityTextView.text =
-                if (product.availabilityStatus == "In Stock") itemView.context.getString(R.string.in_stock) else "Out of Stock" // Use string resource
+            val stockAvailability = if (product.stock > 5) {
+                "In Stock"
+            } else if (product.stock <= 0) {
+                "Out of Stock"
+            } else {
+                "Only 3 left!"
+            }
+            binding.productAvailabilityTextView.text = stockAvailability
             binding.productAvailabilityTextView.setTextColor(
-                if (product.availabilityStatus == "In Stock") itemView.context.getColor(R.color.availability_in_stock) else itemView.context.getColor(
-                    android.R.color.holo_red_light
-                )
+                if (product.stock > 5)
+                    context.getColor(R.color.availability_in_stock)
+                else
+                    context.getColor(android.R.color.holo_red_light)
             )
 
             binding.productCategoryTextView.text = product.category

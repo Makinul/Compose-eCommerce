@@ -11,9 +11,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.makinul.bs23104.R
 import com.makinul.bs23104.data.Data
-import com.makinul.bs23104.data.ProductResponse
 import com.makinul.bs23104.data.model.Product
 import com.makinul.bs23104.databinding.FragmentHomeBinding
+import com.makinul.bs23104.utils.AppConstants
 import com.makinul.bs23104.utils.Extensions.gone
 import com.makinul.bs23104.utils.Extensions.visible
 import dagger.hilt.android.AndroidEntryPoint
@@ -23,7 +23,15 @@ import dagger.hilt.android.AndroidEntryPoint
  */
 @AndroidEntryPoint
 class HomeFragment : Fragment() {
+
     private val viewModel: MainViewModel by activityViewModels()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        initialPage = 0
+        items.clear()
+    }
 
     private var _binding: FragmentHomeBinding? = null
 
@@ -40,29 +48,55 @@ class HomeFragment : Fragment() {
 
         prepareObserver()
 
+        binding.swipeRefreshLayout.setOnRefreshListener {
+            initialPage = 0
+            items.clear()
+            viewModel.fetchProducts(initialPage)
+            binding.swipeRefreshLayout.isRefreshing = false
+        }
+
         return binding.root
     }
+
+    private var isLoading = false // Track loading state
+    private var initialPage = 0
 
     private fun prepareObserver() {
         viewModel.products.observe(viewLifecycleOwner) { event ->
             event.getContentIfNotHandled()?.let {
                 when (it) {
                     is Data.Error -> {
-                        binding.statusLay.root.visible()
-                        binding.statusLay.statusMessage.text = it.message
+                        isLoading = false
+                        if (items.isEmpty()) {
+                            binding.statusLay.root.visible()
+                            binding.statusLay.statusMessage.text = it.message
+                        } else {
+
+                        }
                     }
 
                     Data.Loading -> {
-                        binding.statusLay.root.visible()
-                        binding.statusLay.progressBar.visibility = View.VISIBLE
+                        isLoading = true
+                        if (items.isEmpty()) {
+                            binding.statusLay.root.visible()
+                            binding.statusLay.progressBar.visible()
+                        }
                     }
 
                     is Data.Success -> {
+                        isLoading = false
                         binding.statusLay.root.gone()
                         val data = it.data
-                        items.clear()
+                        initialPage += 1
                         if (data.products.isNotEmpty()) {
-                            items.addAll(data.products)
+                            if (items.isEmpty()) {
+                                items.addAll(data.products)
+                                items.add(Product(key = AppConstants.KEY_FOOTER))
+                            } else {
+                                items.removeAt(items.lastIndex)
+                                items.addAll(data.products)
+                                items.add(Product(key = AppConstants.KEY_FOOTER))
+                            }
                         }
                         adapter.notifyDataSetChanged()
                     }
@@ -74,7 +108,10 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel.fetchProducts()
+        if (items.isEmpty()) {
+            viewModel.fetchProducts(initialPage)
+        }
+
         prepareView()
     }
 
@@ -93,10 +130,30 @@ class HomeFragment : Fragment() {
                 }
             }
         )
+
+        val linearlayoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
         binding.recyclerView.apply {
-            layoutManager = LinearLayoutManager(requireActivity(), RecyclerView.VERTICAL, false)
+            layoutManager = linearlayoutManager
             adapter = this@HomeFragment.adapter
         }
+
+        // Set up the scroll listener for "load more"
+        binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                if (dy > 0) { // Check for scrolling down
+                    val visibleItemCount = linearlayoutManager.childCount
+                    val totalItemCount = linearlayoutManager.itemCount
+                    val firstVisibleItemPosition =
+                        linearlayoutManager.findFirstVisibleItemPosition()
+
+                    if (!isLoading && (visibleItemCount + firstVisibleItemPosition) >= totalItemCount && totalItemCount > 0) {
+                        // Trigger load more
+                        viewModel.fetchProducts(initialPage)
+                    }
+                }
+            }
+        })
     }
 
     override fun onDestroyView() {

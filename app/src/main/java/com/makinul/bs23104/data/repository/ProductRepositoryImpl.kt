@@ -11,10 +11,11 @@ class ProductRepositoryImpl @Inject constructor(
     val api: ApiService
 ) : ProductRepository {
 
-    override suspend fun fetchProducts(): Data<ProductResponse> {
+    override suspend fun fetchProducts(initialPage: Int): Data<ProductResponse> {
         AppConstants.showLog("fetchProducts")
         return try {
-            val response = api.fetchProducts()
+            val skip = initialPage * AppConstants.productFetchInitialLimit
+            val response = api.fetchProducts(skip = skip)
             val isSuccessful = response.isSuccessful
             if (isSuccessful) {
                 response.body()?.let { dashboardData ->
