@@ -13,6 +13,8 @@ import com.makinul.bs23104.databinding.ItemProductHeaderBinding
 import com.makinul.bs23104.utils.AppConstants
 import com.makinul.bs23104.utils.AppConstants.KEY_FOOTER
 import com.makinul.bs23104.utils.AppConstants.KEY_HEADER
+import com.makinul.bs23104.utils.Extensions.gone
+import com.makinul.bs23104.utils.Extensions.visible
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -170,7 +172,15 @@ class ProductAdapter(
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bindData(context: Context, position: Int) {
-//            itemView.invisible()
+            val item = list[position]
+            binding.footerTextView.text = item.message
+
+            // -1 = loading, 1 = success, 0 = failed
+            if (item.state == -1) {
+                binding.progressBar.visible()
+            } else {
+                binding.progressBar.gone()
+            }
 //
 //            if (isInViewMode) {
 //                binding.viewReportCondition.gone()

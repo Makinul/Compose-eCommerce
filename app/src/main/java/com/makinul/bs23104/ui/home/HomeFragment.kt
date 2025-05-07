@@ -74,7 +74,8 @@ class HomeFragment : Fragment() {
                             items.add(
                                 Product(
                                     key = AppConstants.KEY_FOOTER,
-                                    message = getString(R.string.loading)
+                                    message = getString(R.string.no_data_found),
+                                    state = 0
                                 )
                             )
                         }
@@ -100,7 +101,8 @@ class HomeFragment : Fragment() {
                                 items.add(
                                     Product(
                                         key = AppConstants.KEY_FOOTER,
-                                        message = getString(R.string.loading)
+                                        message = getString(R.string.end_of_list),
+                                        state = 1
                                     )
                                 )
                             } else {
@@ -109,7 +111,8 @@ class HomeFragment : Fragment() {
                                 items.add(
                                     Product(
                                         key = AppConstants.KEY_FOOTER,
-                                        message = getString(R.string.loading)
+                                        message = getString(R.string.loading),
+                                        state = 1
                                     )
                                 )
                             }

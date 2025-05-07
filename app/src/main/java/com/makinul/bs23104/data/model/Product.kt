@@ -30,11 +30,13 @@ data class Product(
 ) {
     var key = -1
     var message = ""
+    var state: Int = -1 // -1 = loading, 1 = success, 0 = failed
 
     // Secondary constructor that takes only the most common fields.
     constructor(
         key: Int,
-        message: String
+        message: String,
+        state: Int
     ) : this(
         id = -1,
         title = "",
