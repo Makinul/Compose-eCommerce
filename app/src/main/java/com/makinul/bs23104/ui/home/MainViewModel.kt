@@ -22,8 +22,8 @@ class MainViewModel @Inject constructor(
     private val _products by lazy { MutableLiveData<Event<Data<ProductResponse>>>() }
     val products: LiveData<Event<Data<ProductResponse>>> = _products
 
-    fun fetchProducts() = viewModelScope.launch(Dispatchers.IO) {
+    fun fetchProducts(initialPage: Int) = viewModelScope.launch(Dispatchers.IO) {
         _products.postValue(Event(Data.Loading))
-        _products.postValue(Event(repository.fetchProducts()))
+        _products.postValue(Event(repository.fetchProducts(initialPage)))
     }
 }

@@ -28,4 +28,32 @@ data class Product(
     val thumbnail: String
 ) {
     var key = -1
+
+    // Secondary constructor that takes only the most common fields.
+    constructor(
+        key: Int
+    ) : this(
+        id = -1,
+        title = "",
+        description = "", // Default values for the other parameters
+        category = "",
+        price = 0.0,
+        discountPercentage = 0.0,
+        rating = 0.0,
+        stock = 0,
+        tags = emptyList(),
+        brand = "",
+        sku = "",
+        weight = 0,
+        dimensions = Dimensions(0.0, 0.0, 0.0),
+        warrantyInformation = "",
+        shippingInformation = "",
+        availabilityStatus = "",
+        reviews = emptyList(),
+        returnPolicy = "",
+        minimumOrderQuantity = 0,
+        meta = Meta("", "", "", ""),
+        images = emptyList(),
+        thumbnail = ""
+    )
 }

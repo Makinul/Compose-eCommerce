@@ -4,5 +4,5 @@ import com.makinul.bs23104.data.Data
 import com.makinul.bs23104.data.ProductResponse
 
 interface ProductRepository {
-    suspend fun fetchProducts(): Data<ProductResponse>
+    suspend fun fetchProducts(initialPage: Int): Data<ProductResponse>
 }
