@@ -9,13 +9,14 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.createGraph
+import androidx.navigation.navArgument
 import com.makinul.bs23104.R
 import com.makinul.bs23104.ui.theme.AppTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -63,16 +64,22 @@ class MainActivity : ComponentActivity() {
                             val detailsRoute = "${NavRoutes.DETAILS_SCREEN}/{productId}"
                             composable(
                                 route = detailsRoute,
-                                arguments = listOf(navArgument("productId") { type = NavType.IntType })
+                                arguments = listOf(navArgument("productId") {
+                                    type = NavType.IntType
+                                })
                             ) { backStackEntry ->
                                 val productId = backStackEntry.arguments?.getInt("productId")
                                 if (productId != null) {
-                                    val product = viewModel.getProductById(productId) // Use ViewModel here
+                                    val product =
+                                        viewModel.getProductById(productId) // Use ViewModel here
                                     if (product != null) {
                                         // DetailsScreen will be created in a later step
                                         // For now, let's use a temporary Text Composable
                                         // Replace this with DetailsScreen(navController = navController, product = product)
-                                        com.makinul.bs23104.ui.home.details.DetailsScreen(navController = navController, product = product)
+                                        com.makinul.bs23104.ui.home.details.DetailsScreen(
+                                            navController = navController,
+                                            product = product
+                                        )
                                     } else {
                                         Text(
                                             modifier = Modifier.padding(innerPadding),

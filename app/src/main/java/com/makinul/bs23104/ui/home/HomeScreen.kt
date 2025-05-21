@@ -1,6 +1,6 @@
 package com.makinul.bs23104.ui.home
 
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -11,8 +11,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material3.*
-import androidx.compose.material3.pulltorefresh.PullToRefreshContainer
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -20,26 +20,26 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.makinul.bs23104.R
 import com.makinul.bs23104.data.Data
-import com.makinul.bs23104.data.Event
+import com.makinul.bs23104.data.ProductResponse
 import com.makinul.bs23104.data.model.Product
-import com.makinul.bs23104.data.model.ProductResponse
 import com.makinul.bs23104.utils.AppConstants
-import com.makinul.bs23104.utils.formatPrice
-import kotlinx.coroutines.launch
+import androidx.compose.runtime.getValue
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.makinul.bs23104.data.Event
+import com.makinul.bs23104.utils.Extensions.formatPrice
 
 // Placeholder for AppConstants.KEY_FOOTER, ensure this is correctly defined in your project
 // object AppConstants {
@@ -60,11 +60,15 @@ fun FooterItem(product: Product) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (product.state == -1) { // Loading state
-            CircularProgressIndicator(modifier = Modifier.size(24.dp).testTag("footer_loading_indicator"))
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .size(24.dp)
+                    .testTag("footer_loading_indicator")
+            )
             Spacer(modifier = Modifier.width(8.dp))
         }
         Text(
-            text = product.message ?: "",
+            text = product.message,
             style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center
         )
@@ -82,7 +86,7 @@ fun ProductItem(product: Product, onItemClick: (Product) -> Unit) {
             .fillMaxWidth()
             .padding(horizontal = 8.dp, vertical = 4.dp)
             .clickable { onItemClick(product) }
-            .testTag("product_item_${product.id ?: product.title}"), // Unique test tag for each item
+            .testTag("product_item_${product.id}"), // Unique test tag for each item
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
@@ -106,19 +110,19 @@ fun ProductItem(product: Product, onItemClick: (Product) -> Unit) {
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = product.title ?: "No title",
+                    text = product.title,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = "Brand: ${product.brand ?: "N/A"}",
+                    text = "Brand: ${product.brand}",
                     style = MaterialTheme.typography.bodySmall,
                     color = Color.Gray
                 )
                 Text(
-                    text = "Category: ${product.category ?: "N/A"}",
+                    text = "Category: ${product.category}",
                     style = MaterialTheme.typography.bodySmall,
                     color = Color.Gray
                 )
@@ -129,9 +133,9 @@ fun ProductItem(product: Product, onItemClick: (Product) -> Unit) {
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.primary
                     )
-                    if ((product.discountPercentage ?: 0.0) > 0) {
+                    if (product.discountPercentage > 0) {
                         Text(
-                            text = "${product.discountPercentage?.toInt()}% off",
+                            text = "${product.discountPercentage.toInt()}% off",
                             style = MaterialTheme.typography.labelSmall,
                             color = Color.White,
                             modifier = Modifier
@@ -147,16 +151,18 @@ fun ProductItem(product: Product, onItemClick: (Product) -> Unit) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     // Basic Rating Display (Text)
                     Text(
-                        text = "Rating: ${product.rating ?: 0.0}/5",
+                        text = "Rating: ${product.rating}/5",
                         style = MaterialTheme.typography.bodySmall
                     )
                     // For a real RatingBar, you'd implement or use a library.
                     // Example: androidx.compose.material3.Icon for stars if simple
                 }
                 Text(
-                    text = product.availabilityStatus ?: "Availability unknown",
+                    text = product.availabilityStatus,
                     style = MaterialTheme.typography.bodySmall,
-                    color = if (product.availabilityStatus == "In Stock") Color.Green.copy(alpha = 0.7f) else Color.Red.copy(alpha = 0.7f)
+                    color = if (product.availabilityStatus == "In Stock") Color.Green.copy(alpha = 0.7f) else Color.Red.copy(
+                        alpha = 0.7f
+                    )
                 )
             }
         }
@@ -173,16 +179,25 @@ fun StatusDisplay(
     isListEmpty: Boolean, // Added to control visibility based on list content
     onRetry: () -> Unit
 ) {
-    Box(modifier = modifier.fillMaxSize().testTag("status_display"), contentAlignment = Alignment.Center) {
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .testTag("status_display"),
+        contentAlignment = Alignment.Center
+    ) {
         when (dataState) {
             is Data.Loading -> {
                 if (isListEmpty) { // Only show full screen loading if list is empty
                     CircularProgressIndicator(modifier = Modifier.testTag("status_loading_indicator"))
                 }
             }
+
             is Data.Error -> {
-                 if (isListEmpty) { // Only show full screen error if list is empty
-                    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.testTag("status_error_display")) {
+                if (isListEmpty) { // Only show full screen error if list is empty
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.testTag("status_error_display")
+                    ) {
                         Icon(
                             imageVector = Icons.Default.Error,
                             contentDescription = "Error",
@@ -199,13 +214,17 @@ fun StatusDisplay(
                             Text(text = stringResource(id = R.string.retry))
                         }
                     }
-                 }
+                }
             }
+
             is Data.Success<*> -> {
-                if (isListEmpty && (dataState.data == null || (dataState.data is List<*> && (dataState.data as List<*>).isEmpty()))) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.testTag("status_empty_display")) {
-                         Icon(
-                            imageVector = Icons.Default.CloudOff, // Or a more suitable icon
+                if (isListEmpty && (dataState.data == null || (dataState.data is List<*> && dataState.data.isEmpty()))) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.testTag("status_empty_display")
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.CloudOff,
                             contentDescription = "No Data",
                             modifier = Modifier.size(48.dp),
                             tint = Color.Gray
@@ -237,7 +256,12 @@ fun ProductList(
     onItemClick: (Product) -> Unit
 ) {
     LazyColumn(modifier = modifier.testTag("product_list"), state = listState) {
-        items(items = products, key = { product -> product.id?.toString() ?: product.key ?: "product_${System.identityHashCode(product)}" }) { product ->
+        items(
+            items = products,
+            key = { product ->
+                product.id?.toString() ?: product.key
+                ?: "product_${System.identityHashCode(product)}"
+            }) { product ->
             if (product.key == AppConstants.KEY_FOOTER) {
                 FooterItem(product = product) // FooterItem already has testTags
             } else {
@@ -279,7 +303,7 @@ fun HomeScreen(
     viewModel: MainViewModel = hiltViewModel()
 ) {
     val productDataEvent by viewModel.products.collectAsStateWithLifecycle()
-    var currentDataState by remember { mutableStateOf<Data<ProductResponse>>(Data.Loading()) }
+    var currentDataState by remember { mutableStateOf<Data<ProductResponse>>(Data.Loading) }
 
     val items = remember { mutableStateListOf<Product>() }
     var currentPage by remember { mutableIntStateOf(0) } // Corresponds to initialPage in HomeFragment
@@ -321,35 +345,71 @@ fun HomeScreen(
                         currentPage++ // Increment page for next fetch
 
                         if (productResponse.products.isEmpty() || items.size >= productResponse.total) {
-                            items.add(Product(key = AppConstants.KEY_FOOTER, message = stringResource(R.string.no_more_data_to_load), state = AppConstants.STATE_NO_MORE_DATA))
+                            items.add(
+                                Product(
+                                    key = AppConstants.KEY_FOOTER,
+                                    message = stringResource(R.string.no_more_data_to_load),
+                                    state = AppConstants.STATE_NO_MORE_DATA
+                                )
+                            )
                         } else {
-                            items.add(Product(key = AppConstants.KEY_FOOTER, message = stringResource(R.string.loading_more), state = AppConstants.STATE_LOADING))
+                            items.add(
+                                Product(
+                                    key = AppConstants.KEY_FOOTER,
+                                    message = stringResource(R.string.loading_more),
+                                    state = AppConstants.STATE_LOADING
+                                )
+                            )
                         }
                     } else {
                         // Handle null data in success case, perhaps show "no data" footer
                         items.removeAll { it.key == AppConstants.KEY_FOOTER }
-                        items.add(Product(key = AppConstants.KEY_FOOTER, message = stringResource(R.string.no_data_found), state = AppConstants.STATE_ERROR))
+                        items.add(
+                            Product(
+                                key = AppConstants.KEY_FOOTER,
+                                message = stringResource(R.string.no_data_found),
+                                state = AppConstants.STATE_ERROR
+                            )
+                        )
                     }
                 }
+
                 is Data.Error -> {
                     items.removeAll { it.key == AppConstants.KEY_FOOTER }
-                    items.add(Product(key = AppConstants.KEY_FOOTER, message = data.message ?: stringResource(R.string.error_loading_more), state = AppConstants.STATE_ERROR))
+                    items.add(
+                        Product(
+                            key = AppConstants.KEY_FOOTER,
+                            message = data.message,
+                            state = AppConstants.STATE_ERROR
+                        )
+                    )
                 }
+
                 is Data.Loading -> {
                     if (items.none { it.key == AppConstants.KEY_FOOTER }) {
-                         if (items.isNotEmpty()) { // Only add loading footer if there are items already
-                            items.add(Product(key = AppConstants.KEY_FOOTER, message = stringResource(R.string.loading_more), state = AppConstants.STATE_LOADING))
-                         }
-                    } else {
-                        items.indexOfFirst { it.key == AppConstants.KEY_FOOTER }.takeIf { it != -1 }?.let { index ->
-                            items[index] = items[index].copy(state = AppConstants.STATE_LOADING, message = stringResource(R.string.loading_more))
+                        if (items.isNotEmpty()) { // Only add loading footer if there are items already
+                            items.add(
+                                Product(
+                                    key = AppConstants.KEY_FOOTER,
+                                    message = stringResource(R.string.loading_more),
+                                    state = AppConstants.STATE_LOADING
+                                )
+                            )
                         }
+                    } else {
+                        items.indexOfFirst { it.key == AppConstants.KEY_FOOTER }.takeIf { it != -1 }
+                            ?.let { index ->
+                                items[index] = items[index].copy(
+                                    state = AppConstants.STATE_LOADING,
+                                    message = stringResource(R.string.loading_more)
+                                )
+                            }
                     }
                 }
             }
         }
     }
-    
+
     // Initial data load
     LaunchedEffect(Unit) {
         if (items.isEmpty()) {
@@ -357,9 +417,13 @@ fun HomeScreen(
         }
     }
 
-    Box(modifier = Modifier.nestedScroll(pullToRefreshState.nestedScrollConnection).testTag("home_screen_box")) {
+    Box(
+        modifier = Modifier
+            .nestedScroll(pullToRefreshState.nestedScrollConnection)
+            .testTag("home_screen_box")
+    ) {
         if (items.isEmpty() && (currentDataState is Data.Loading || currentDataState is Data.Error)) {
-             StatusDisplay( // StatusDisplay itself has a root testTag
+            StatusDisplay( // StatusDisplay itself has a root testTag
                 dataState = currentDataState,
                 isListEmpty = items.isEmpty(),
                 onRetry = {
@@ -391,7 +455,9 @@ fun HomeScreen(
 
         PullToRefreshContainer(
             state = pullToRefreshState,
-            modifier = Modifier.align(Alignment.TopCenter).testTag("pull_to_refresh_container")
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .testTag("pull_to_refresh_container")
         )
     }
 }

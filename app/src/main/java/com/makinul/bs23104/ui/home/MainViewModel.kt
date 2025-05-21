@@ -28,7 +28,7 @@ class MainViewModel @Inject constructor(
         _products.postValue(Event(Data.Loading))
         val result = repository.fetchProducts(initialPage)
         if (result is Data.Success) {
-            result.data?.products?.let { newProducts ->
+            result.data.products.let { newProducts ->
                 if (initialPage == 0) { // Assuming 0 is the first page
                     productCache = newProducts
                 } else {

@@ -14,7 +14,6 @@ import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.google.android.material.textfield.TextInputEditText
 import java.text.DecimalFormat
 import kotlin.math.pow
-import kotlin.math.sqrt
 
 /**
  * A collection of extension functions and properties to simplify common operations on various Android UI elements and data types.
@@ -306,5 +305,9 @@ object Extensions {
             }
             .toIntArray()
             .distinct()
+    }
+
+    fun Double.formatPrice(discountPercentage: Double): String {
+        return "0.0"
     }
 }

@@ -13,19 +13,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.makinul.bs23104.R
 import com.makinul.bs23104.data.model.Product
-import com.makinul.bs23104.ui.home.RatingBar // Reusing RatingBar from HomeScreen
-import com.makinul.bs23104.utils.formatPrice // Reusing formatPrice
+import com.makinul.bs23104.ui.home.RatingBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -33,7 +32,7 @@ fun DetailsScreen(navController: NavController, product: Product) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(product.title ?: "Details") },
+                title = { Text(product.title) },
                 navigationIcon = {
                     IconButton(
                         onClick = { navController.navigateUp() },
@@ -58,7 +57,7 @@ fun DetailsScreen(navController: NavController, product: Product) {
             // Product Image
             AsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
-                    .data(product.thumbnail ?: product.images?.firstOrNull())
+                    .data(product.thumbnail)
                     .crossfade(true)
                     .build(),
                 placeholder = painterResource(R.drawable.ic_placeholder),
@@ -74,7 +73,7 @@ fun DetailsScreen(navController: NavController, product: Product) {
 
             // Product Title
             Text(
-                text = product.title ?: "No title",
+                text = product.title,
                 style = MaterialTheme.typography.headlineMedium, // Was TextAppearance.AppCompat.Headline
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
@@ -84,7 +83,7 @@ fun DetailsScreen(navController: NavController, product: Product) {
 
             // Product Brand
             Text(
-                text = "Brand: ${product.brand ?: "N/A"}",
+                text = "Brand: ${product.brand}",
                 style = MaterialTheme.typography.titleMedium, // Was TextAppearance.AppCompat.Subhead
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(bottom = 8.dp) // Corresponds to detail_margin_top for price
@@ -92,8 +91,8 @@ fun DetailsScreen(navController: NavController, product: Product) {
 
             // Product Price and Discount
             Row(verticalAlignment = Alignment.CenterVertically) {
-                val originalPrice = product.price?.toDouble() ?: 0.0
-                val discountPercentage = product.discountPercentage ?: 0.0
+                val originalPrice = product.price.toDouble()
+                val discountPercentage = product.discountPercentage
                 val discountedPrice = originalPrice * (1 - (discountPercentage / 100.0))
 
                 Text(
@@ -111,7 +110,7 @@ fun DetailsScreen(navController: NavController, product: Product) {
                         modifier = Modifier.padding(start = 8.dp)
                     )
                     Text(
-                        text = "${product.discountPercentage?.toInt()}% off",
+                        text = "${product.discountPercentage.toInt()}% off",
                         style = MaterialTheme.typography.labelSmall,
                         color = Color.White, // Was discount_text_color
                         modifier = Modifier
@@ -129,9 +128,9 @@ fun DetailsScreen(navController: NavController, product: Product) {
 
             // Rating
             Row(verticalAlignment = Alignment.CenterVertically) {
-                RatingBar(rating = product.rating?.toFloat() ?: 0f)
+                RatingBar(rating = product.rating.toFloat())
                 Text(
-                    text = "(${product.rating ?: 0.0})",
+                    text = "(${product.rating})",
                     style = MaterialTheme.typography.bodySmall, // Was TextAppearance.AppCompat.Caption
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(start = 4.dp)
@@ -145,11 +144,16 @@ fun DetailsScreen(navController: NavController, product: Product) {
                 Text(
                     text = product.availabilityStatus ?: "Availability: ${product.stock ?: 0} left",
                     style = MaterialTheme.typography.bodySmall, // Was TextAppearance.AppCompat.Caption
-                    color = if (product.availabilityStatus == "In Stock" || (product.stock ?: 0) > 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error, // Was availability_in_stock
+                    color = if (product.availabilityStatus == "In Stock" ||
+                        (product.stock ?: 0) > 0
+                    )
+                        MaterialTheme.colorScheme.primary
+                    else
+                        MaterialTheme.colorScheme.error, // Was availability_in_stock
                 )
                 Spacer(modifier = Modifier.width(16.dp)) // Was detail_margin_large
                 Text(
-                    text = "Category: ${product.category ?: "N/A"}",
+                    text = "Category: ${product.category}",
                     style = MaterialTheme.typography.bodySmall, // Was TextAppearance.AppCompat.Caption
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -159,7 +163,7 @@ fun DetailsScreen(navController: NavController, product: Product) {
 
             // Product Description
             Text(
-                text = product.description ?: "No description available.",
+                text = product.description,
                 style = MaterialTheme.typography.bodyLarge, // Was TextAppearance.AppCompat.Body1
                 modifier = Modifier.testTag("details_product_description") // Test tag for product description
             )
