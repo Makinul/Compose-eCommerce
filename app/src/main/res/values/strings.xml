@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Android Task 104</string>
+    <string name="app_name">Compose eCommerce</string>
     <string name="action_settings">Settings</string>
     <!-- Strings used for fragments for navigation -->
     <string name="first_fragment_label">Home</string>

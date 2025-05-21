@@ -19,5 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Android Task 104"
+rootProject.name = "Compose eCommerce"
 include(":app")
