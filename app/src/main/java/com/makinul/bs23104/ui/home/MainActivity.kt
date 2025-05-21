@@ -1,64 +1,99 @@
 package com.makinul.bs23104.ui.home
 
 import android.os.Bundle
-import com.google.android.material.snackbar.Snackbar
-import androidx.appcompat.app.AppCompatActivity
-import androidx.navigation.findNavController
-import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.navigateUp
-import androidx.navigation.ui.setupActionBarWithNavController
-import android.view.Menu
-import android.view.MenuItem
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.createGraph
 import com.makinul.bs23104.R
-import com.makinul.bs23104.databinding.ActivityMainBinding
+import com.makinul.bs23104.ui.theme.AppTheme
 import dagger.hilt.android.AndroidEntryPoint
 
+// Define route constants based on nav_graph.xml IDs
+object NavRoutes {
+    const val HOME_SCREEN = "home_screen"
+    const val DETAILS_SCREEN = "details_screen"
+}
+
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity() {
+class MainActivity : ComponentActivity() {
 
-    private lateinit var appBarConfiguration: AppBarConfiguration
-    private lateinit var binding: ActivityMainBinding
-    private val viewModel: MainViewModel by viewModels()
+    private val viewModel: MainViewModel by viewModels() // Keep ViewModel if needed for Activity-level logic
 
+    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        setContent {
+            AppTheme {
+                val navController = rememberNavController()
 
-        setSupportActionBar(binding.toolbar)
+                Scaffold(
+                    topBar = {
+                        TopAppBar(
+                            title = { Text(text = stringResource(id = R.string.app_name)) }
+                            // Navigation icon and actions can be added here later
+                        )
+                    }
+                ) { innerPadding ->
+                    NavHost(
+                        navController = navController,
+                        // Use createGraph to leverage the existing XML navigation graph
+                        // R.id.FirstFragment and R.id.SecondFragment are integer IDs from the XML graph
+                        graph = navController.createGraph(
+                            startDestination = NavRoutes.HOME_SCREEN, // String route for start destination
+                            route = "main_graph" // A string name for this graph
+                        ) {
+                            // Map R.id.FirstFragment to NavRoutes.HOME_SCREEN
+                            composable(NavRoutes.HOME_SCREEN) {
+                                HomeScreen(navController = navController)
+                            }
 
-        val navController = findNavController(R.id.nav_host_fragment_content_main)
-        appBarConfiguration = AppBarConfiguration(navController.graph)
-        setupActionBarWithNavController(navController, appBarConfiguration)
-
-//        binding.fab.setOnClickListener { view ->
-//            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                .setAction("Action", null)
-//                .setAnchorView(R.id.fab).show()
-//        }
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        menuInflater.inflate(R.menu.menu_main, menu)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        return when (item.itemId) {
-            R.id.action_settings -> true
-            else -> super.onOptionsItemSelected(item)
+                            val detailsRoute = "${NavRoutes.DETAILS_SCREEN}/{productId}"
+                            composable(
+                                route = detailsRoute,
+                                arguments = listOf(navArgument("productId") { type = NavType.IntType })
+                            ) { backStackEntry ->
+                                val productId = backStackEntry.arguments?.getInt("productId")
+                                if (productId != null) {
+                                    val product = viewModel.getProductById(productId) // Use ViewModel here
+                                    if (product != null) {
+                                        // DetailsScreen will be created in a later step
+                                        // For now, let's use a temporary Text Composable
+                                        // Replace this with DetailsScreen(navController = navController, product = product)
+                                        com.makinul.bs23104.ui.home.details.DetailsScreen(navController = navController, product = product)
+                                    } else {
+                                        Text(
+                                            modifier = Modifier.padding(innerPadding),
+                                            text = "Error: Product with ID $productId not found."
+                                        )
+                                    }
+                                } else {
+                                    Text(
+                                        modifier = Modifier.padding(innerPadding),
+                                        text = "Error: Product ID not provided."
+                                    )
+                                }
+                            }
+                        },
+                        modifier = Modifier.padding(innerPadding)
+                    )
+                }
+            }
         }
     }
-
-    override fun onSupportNavigateUp(): Boolean {
-        val navController = findNavController(R.id.nav_host_fragment_content_main)
-        return navController.navigateUp(appBarConfiguration)
-                || super.onSupportNavigateUp()
-    }
 }
+
+// Add this import if not already present (it should be if DetailsScreen.kt is created)
+// import com.makinul.bs23104.ui.home.details.DetailsScreen

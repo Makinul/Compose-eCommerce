@@ -22,8 +22,26 @@ class MainViewModel @Inject constructor(
     private val _products by lazy { MutableLiveData<Event<Data<ProductResponse>>>() }
     val products: LiveData<Event<Data<ProductResponse>>> = _products
 
+    private var productCache = listOf<Product>()
+
     fun fetchProducts(initialPage: Int) = viewModelScope.launch(Dispatchers.IO) {
         _products.postValue(Event(Data.Loading))
-        _products.postValue(Event(repository.fetchProducts(initialPage)))
+        val result = repository.fetchProducts(initialPage)
+        if (result is Data.Success) {
+            result.data?.products?.let { newProducts ->
+                if (initialPage == 0) { // Assuming 0 is the first page
+                    productCache = newProducts
+                } else {
+                    // Append if it's a subsequent page; ensure no duplicates if API might return them
+                    val currentIds = productCache.map { it.id }.toSet()
+                    productCache = productCache + newProducts.filterNot { currentIds.contains(it.id) }
+                }
+            }
+        }
+        _products.postValue(Event(result))
+    }
+
+    fun getProductById(id: Int): Product? {
+        return productCache.find { it.id == id }
     }
 }

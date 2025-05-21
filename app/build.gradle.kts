@@ -3,11 +3,20 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.google.dagger.hilt.android)
     alias(libs.plugins.google.devtools.ksp)
+    alias(libs.plugins.org.jetbrains.kotlin.plugin.compose)
 }
 
 android {
     namespace = "com.makinul.bs23104"
     compileSdk = 35
+
+    buildFeatures {
+        compose = true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion = libs.versions.composeCompiler.get()
+    }
 
     defaultConfig {
         applicationId = "com.makinul.bs23104"
@@ -41,6 +50,19 @@ android {
 }
 
 dependencies {
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.ui.tooling.preview)
+    implementation(libs.androidx.compose.runtime)
+    implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.hilt.navigation.compose)
+    debugImplementation(libs.androidx.compose.ui.tooling)
+
+    implementation(libs.coil.compose) // Coil for image loading
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
@@ -50,6 +72,10 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(platform(libs.androidx.compose.bom)) // Ensure BOM is used for test dependencies too
+    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
+
 
     // Swipe Refresh Layout
     implementation(libs.androidx.swiperefreshlayout)
