@@ -7,6 +7,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CloudOff
+import androidx.compose.material.icons.filled.Error
 import androidx.compose.material3.*
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.*
@@ -22,6 +25,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -35,10 +39,17 @@ import com.makinul.bs23104.data.model.Product
 import com.makinul.bs23104.utils.AppConstants
 import com.makinul.bs23104.utils.Extensions.formatPrice
 
-// Placeholder for AppConstants.KEY_FOOTER, ensure this is correctly defined in your project
-// object AppConstants {
-// const val KEY_FOOTER = "footer"
-// }
+@Composable
+@Preview
+fun FooterPreview() {
+    FooterItem(
+        Product(
+            key = AppConstants.KEY_FOOTER,
+            message = "stringResource(R.string.loading_more)",
+            state = AppConstants.STATE_LOADING
+        )
+    )
+}
 
 /**
  * FooterItem Composable
@@ -66,6 +77,20 @@ fun FooterItem(product: Product) {
             style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center
         )
+    }
+}
+
+@Composable
+@Preview
+fun ProductPreview() {
+    ProductItem(
+        Product(
+            key = AppConstants.KEY_FOOTER,
+            message = "stringResource(R.string.loading_more)",
+            state = AppConstants.STATE_LOADING
+        )
+    ) {
+
     }
 }
 
@@ -163,6 +188,17 @@ fun ProductItem(product: Product, onItemClick: (Product) -> Unit) {
     }
 }
 
+@Preview
+@Composable
+fun StatusDisplayPreview() {
+    StatusDisplay(
+        dataState = Data.Error(),
+        isListEmpty = true,
+    ) {
+
+    }
+}
+
 /**
  * StatusDisplay Composable
  */
@@ -193,7 +229,7 @@ fun StatusDisplay(
                         modifier = Modifier.testTag("status_error_display")
                     ) {
                         Icon(
-                            painter = painterResource(id = R.drawable.ic_star_filled),
+                            imageVector = Icons.Default.Error,
                             contentDescription = "Error",
                             modifier = Modifier.size(48.dp),
                             tint = MaterialTheme.colorScheme.error
@@ -218,7 +254,7 @@ fun StatusDisplay(
                         modifier = Modifier.testTag("status_empty_display")
                     ) {
                         Icon(
-                            painter = painterResource(id = R.drawable.ic_star_filled),
+                            imageVector = Icons.Default.CloudOff,
                             contentDescription = "No Data",
                             modifier = Modifier.size(48.dp),
                             tint = Color.Gray
