@@ -10,8 +10,6 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.RecyclerView.ViewHolder
-import com.google.android.material.textfield.TextInputEditText
 import java.text.DecimalFormat
 import kotlin.math.pow
 
@@ -155,23 +153,6 @@ object Extensions {
     }
 
     /**
-     * Sets a custom error message and optionally requests focus and shows the soft input keyboard for a [TextInputEditText].
-     *
-     * @param errorMsg The error message to set.
-     * @param requestFocus If true, request focus for the [TextInputEditText].
-     * @param showSoftInput If true, show the soft input keyboard for the [TextInputEditText].
-     */
-    fun TextInputEditText.setCustomError(
-        errorMsg: String,
-        requestFocus: Boolean = false,
-        showSoftInput: Boolean = false
-    ) {
-        this.error = errorMsg
-        if (requestFocus) this.requestFocus()
-        if (showSoftInput) this.showSoftKeyboard()
-    }
-
-    /**
      * Formats a [Double] using the specified decimal format string.
      *
      * @param format The decimal format string to use.
@@ -216,29 +197,6 @@ object Extensions {
      */
     fun Double.cv(avg: Double): Double {
         return this / avg * 100
-    }
-
-    /**
-     * Retrieves a formatted [String] resource with a single parameter.
-     *
-     * @param resourceId The resource ID of the formatted [String].
-     * @param param The parameter to insert into the formatted [String].
-     * @return The formatted [String].
-     */
-    fun ViewHolder.getString(@StringRes resourceId: Int, param: String): String {
-        return this.itemView.context.getString(resourceId, param)
-    }
-
-    /**
-     * Retrieves a formatted [String] resource with two parameters.
-     *
-     * @param resourceId The resource ID of the formatted [String].
-     * @param param1 The first parameter to insert into the formatted [String].
-     * @param param2 The second parameter to insert into the formatted [String].
-     * @return The formatted [String].
-     */
-    fun ViewHolder.getString(@StringRes resourceId: Int, param1: String, param2: String): String {
-        return this.itemView.context.getString(resourceId, param1, param2)
     }
 
     /**

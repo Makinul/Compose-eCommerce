@@ -18,6 +18,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.createGraph
 import androidx.navigation.navArgument
 import com.makinul.bs23104.R
+import com.makinul.bs23104.ui.home.details.DetailsScreen
 import com.makinul.bs23104.ui.theme.AppTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -30,7 +31,7 @@ object NavRoutes {
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    private val viewModel: MainViewModel by viewModels() // Keep ViewModel if needed for Activity-level logic
+    private val viewModel: MainViewModel by viewModels()
 
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,7 +40,6 @@ class MainActivity : ComponentActivity() {
         setContent {
             AppTheme {
                 val navController = rememberNavController()
-
                 Scaffold(
                     topBar = {
                         TopAppBar(
@@ -51,7 +51,6 @@ class MainActivity : ComponentActivity() {
                     NavHost(
                         navController = navController,
                         // Use createGraph to leverage the existing XML navigation graph
-                        // R.id.FirstFragment and R.id.SecondFragment are integer IDs from the XML graph
                         graph = navController.createGraph(
                             startDestination = NavRoutes.HOME_SCREEN, // String route for start destination
                             route = "main_graph" // A string name for this graph
@@ -76,7 +75,7 @@ class MainActivity : ComponentActivity() {
                                         // DetailsScreen will be created in a later step
                                         // For now, let's use a temporary Text Composable
                                         // Replace this with DetailsScreen(navController = navController, product = product)
-                                        com.makinul.bs23104.ui.home.details.DetailsScreen(
+                                        DetailsScreen(
                                             navController = navController,
                                             product = product
                                         )
@@ -101,6 +100,3 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-
-// Add this import if not already present (it should be if DetailsScreen.kt is created)
-// import com.makinul.bs23104.ui.home.details.DetailsScreen

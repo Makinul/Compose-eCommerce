@@ -7,12 +7,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CloudOff
-import androidx.compose.material.icons.filled.Error
 import androidx.compose.material3.*
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -27,7 +23,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
@@ -36,9 +33,6 @@ import com.makinul.bs23104.data.Data
 import com.makinul.bs23104.data.ProductResponse
 import com.makinul.bs23104.data.model.Product
 import com.makinul.bs23104.utils.AppConstants
-import androidx.compose.runtime.getValue
-import androidx.hilt.navigation.compose.hiltViewModel
-import com.makinul.bs23104.data.Event
 import com.makinul.bs23104.utils.Extensions.formatPrice
 
 // Placeholder for AppConstants.KEY_FOOTER, ensure this is correctly defined in your project
@@ -176,7 +170,7 @@ fun ProductItem(product: Product, onItemClick: (Product) -> Unit) {
 fun StatusDisplay(
     modifier: Modifier = Modifier,
     dataState: Data<*>,
-    isListEmpty: Boolean, // Added to control visibility based on list content
+    isListEmpty: Boolean,
     onRetry: () -> Unit
 ) {
     Box(
@@ -199,13 +193,13 @@ fun StatusDisplay(
                         modifier = Modifier.testTag("status_error_display")
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Error,
+                            painter = painterResource(id = R.drawable.ic_star_filled),
                             contentDescription = "Error",
                             modifier = Modifier.size(48.dp),
                             tint = MaterialTheme.colorScheme.error
                         )
                         Text(
-                            text = dataState.message ?: stringResource(id = R.string.unknown_error),
+                            text = dataState.message,
                             style = MaterialTheme.typography.bodyLarge,
                             textAlign = TextAlign.Center,
                             modifier = Modifier.padding(16.dp)
@@ -224,7 +218,7 @@ fun StatusDisplay(
                         modifier = Modifier.testTag("status_empty_display")
                     ) {
                         Icon(
-                            imageVector = Icons.Default.CloudOff,
+                            painter = painterResource(id = R.drawable.ic_star_filled),
                             contentDescription = "No Data",
                             modifier = Modifier.size(48.dp),
                             tint = Color.Gray
@@ -259,11 +253,10 @@ fun ProductList(
         items(
             items = products,
             key = { product ->
-                product.id?.toString() ?: product.key
-                ?: "product_${System.identityHashCode(product)}"
+                product.id
             }) { product ->
             if (product.key == AppConstants.KEY_FOOTER) {
-                FooterItem(product = product) // FooterItem already has testTags
+                FooterItem(product = product)
             } else {
                 ProductItem(product = product, onItemClick = onItemClick)
             }
@@ -302,9 +295,8 @@ fun HomeScreen(
     navController: NavController,
     viewModel: MainViewModel = hiltViewModel()
 ) {
-    val productDataEvent by viewModel.products.collectAsStateWithLifecycle()
+//    val productDataEvent by viewModel.products.collectAsStateWithLifecycle()
     var currentDataState by remember { mutableStateOf<Data<ProductResponse>>(Data.Loading) }
-
     val items = remember { mutableStateListOf<Product>() }
     var currentPage by remember { mutableIntStateOf(0) } // Corresponds to initialPage in HomeFragment
     var isLoading by remember { mutableStateOf(false) } // For pull-to-refresh and initial load
@@ -313,102 +305,102 @@ fun HomeScreen(
     val pullToRefreshState = rememberPullToRefreshState()
     val coroutineScope = rememberCoroutineScope()
 
-    if (pullToRefreshState.isRefreshing) {
-        LaunchedEffect(true) {
-            items.clear()
-            currentPage = 0
-            viewModel.fetchProducts(currentPage) // Fetch first page
-            // pullToRefreshState.endRefresh() will be called when data comes
-        }
-    }
-
-    // Handle product data events
-    LaunchedEffect(productDataEvent) {
-        productDataEvent?.getContentIfNotHandled()?.let { data ->
-            currentDataState = data // Update current data state for StatusDisplay
-            isLoading = data is Data.Loading && items.isEmpty()
-            isLoadingMore = data is Data.Loading && items.isNotEmpty()
-            pullToRefreshState.endRefresh() // Ensure refresh indicator stops
-
-            when (data) {
-                is Data.Success -> {
-                    val productResponse = data.data
-                    if (productResponse != null) {
-                        if (currentPage == 0) { // If it's the first page (after refresh or initial)
-                            items.clear()
-                        }
-
-                        // Remove old footer if it exists
-                        items.removeAll { it.key == AppConstants.KEY_FOOTER }
-                        items.addAll(productResponse.products)
-
-                        currentPage++ // Increment page for next fetch
-
-                        if (productResponse.products.isEmpty() || items.size >= productResponse.total) {
-                            items.add(
-                                Product(
-                                    key = AppConstants.KEY_FOOTER,
-                                    message = stringResource(R.string.no_more_data_to_load),
-                                    state = AppConstants.STATE_NO_MORE_DATA
-                                )
-                            )
-                        } else {
-                            items.add(
-                                Product(
-                                    key = AppConstants.KEY_FOOTER,
-                                    message = stringResource(R.string.loading_more),
-                                    state = AppConstants.STATE_LOADING
-                                )
-                            )
-                        }
-                    } else {
-                        // Handle null data in success case, perhaps show "no data" footer
-                        items.removeAll { it.key == AppConstants.KEY_FOOTER }
-                        items.add(
-                            Product(
-                                key = AppConstants.KEY_FOOTER,
-                                message = stringResource(R.string.no_data_found),
-                                state = AppConstants.STATE_ERROR
-                            )
-                        )
-                    }
-                }
-
-                is Data.Error -> {
-                    items.removeAll { it.key == AppConstants.KEY_FOOTER }
-                    items.add(
-                        Product(
-                            key = AppConstants.KEY_FOOTER,
-                            message = data.message,
-                            state = AppConstants.STATE_ERROR
-                        )
-                    )
-                }
-
-                is Data.Loading -> {
-                    if (items.none { it.key == AppConstants.KEY_FOOTER }) {
-                        if (items.isNotEmpty()) { // Only add loading footer if there are items already
-                            items.add(
-                                Product(
-                                    key = AppConstants.KEY_FOOTER,
-                                    message = stringResource(R.string.loading_more),
-                                    state = AppConstants.STATE_LOADING
-                                )
-                            )
-                        }
-                    } else {
-                        items.indexOfFirst { it.key == AppConstants.KEY_FOOTER }.takeIf { it != -1 }
-                            ?.let { index ->
-                                items[index] = items[index].copy(
-                                    state = AppConstants.STATE_LOADING,
-                                    message = stringResource(R.string.loading_more)
-                                )
-                            }
-                    }
-                }
-            }
-        }
-    }
+//    if (pullToRefreshState.isRefreshing) {
+//        LaunchedEffect(true) {
+//            items.clear()
+//            currentPage = 0
+//            viewModel.fetchProducts(currentPage) // Fetch first page
+//            // pullToRefreshState.endRefresh() will be called when data comes
+//        }
+//    }
+//
+//    // Handle product data events
+//    LaunchedEffect(productDataEvent) {
+//        productDataEvent?.getContentIfNotHandled()?.let { data ->
+//            currentDataState = data // Update current data state for StatusDisplay
+//            isLoading = data is Data.Loading && items.isEmpty()
+//            isLoadingMore = data is Data.Loading && items.isNotEmpty()
+//            pullToRefreshState.endRefresh() // Ensure refresh indicator stops
+//
+//            when (data) {
+//                is Data.Success -> {
+//                    val productResponse = data.data
+//                    if (productResponse != null) {
+//                        if (currentPage == 0) { // If it's the first page (after refresh or initial)
+//                            items.clear()
+//                        }
+//
+//                        // Remove old footer if it exists
+//                        items.removeAll { it.key == AppConstants.KEY_FOOTER }
+//                        items.addAll(productResponse.products)
+//
+//                        currentPage++ // Increment page for next fetch
+//
+//                        if (productResponse.products.isEmpty() || items.size >= productResponse.total) {
+//                            items.add(
+//                                Product(
+//                                    key = AppConstants.KEY_FOOTER,
+//                                    message = stringResource(R.string.no_more_data_to_load),
+//                                    state = AppConstants.STATE_NO_MORE_DATA
+//                                )
+//                            )
+//                        } else {
+//                            items.add(
+//                                Product(
+//                                    key = AppConstants.KEY_FOOTER,
+//                                    message = stringResource(R.string.loading_more),
+//                                    state = AppConstants.STATE_LOADING
+//                                )
+//                            )
+//                        }
+//                    } else {
+//                        // Handle null data in success case, perhaps show "no data" footer
+//                        items.removeAll { it.key == AppConstants.KEY_FOOTER }
+//                        items.add(
+//                            Product(
+//                                key = AppConstants.KEY_FOOTER,
+//                                message = stringResource(R.string.no_data_found),
+//                                state = AppConstants.STATE_ERROR
+//                            )
+//                        )
+//                    }
+//                }
+//
+//                is Data.Error -> {
+//                    items.removeAll { it.key == AppConstants.KEY_FOOTER }
+//                    items.add(
+//                        Product(
+//                            key = AppConstants.KEY_FOOTER,
+//                            message = data.message,
+//                            state = AppConstants.STATE_ERROR
+//                        )
+//                    )
+//                }
+//
+//                is Data.Loading -> {
+//                    if (items.none { it.key == AppConstants.KEY_FOOTER }) {
+//                        if (items.isNotEmpty()) { // Only add loading footer if there are items already
+//                            items.add(
+//                                Product(
+//                                    key = AppConstants.KEY_FOOTER,
+//                                    message = stringResource(R.string.loading_more),
+//                                    state = AppConstants.STATE_LOADING
+//                                )
+//                            )
+//                        }
+//                    } else {
+//                        items.indexOfFirst { it.key == AppConstants.KEY_FOOTER }.takeIf { it != -1 }
+//                            ?.let { index ->
+//                                items[index] = items[index].copy(
+//                                    state = AppConstants.STATE_LOADING,
+//                                    message = stringResource(R.string.loading_more)
+//                                )
+//                            }
+//                    }
+//                }
+//            }
+//        }
+//    }
 
     // Initial data load
     LaunchedEffect(Unit) {
@@ -419,8 +411,6 @@ fun HomeScreen(
 
     Box(
         modifier = Modifier
-            .nestedScroll(pullToRefreshState.nestedScrollConnection)
-            .testTag("home_screen_box")
     ) {
         if (items.isEmpty() && (currentDataState is Data.Loading || currentDataState is Data.Error)) {
             StatusDisplay( // StatusDisplay itself has a root testTag
@@ -453,12 +443,12 @@ fun HomeScreen(
             )
         }
 
-        PullToRefreshContainer(
-            state = pullToRefreshState,
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .testTag("pull_to_refresh_container")
-        )
+//        PullToRefreshContainer(
+//            state = pullToRefreshState,
+//            modifier = Modifier
+//                .align(Alignment.TopCenter)
+//                .testTag("pull_to_refresh_container")
+//        )
     }
 }
 
