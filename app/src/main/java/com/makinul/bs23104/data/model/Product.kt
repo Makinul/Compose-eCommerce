@@ -1,6 +1,7 @@
 package com.makinul.bs23104.data.model
 
 import com.google.gson.annotations.SerializedName
+import java.io.Serializable
 
 data class Product(
     val id: Int,
@@ -26,7 +27,7 @@ data class Product(
     val meta: Meta,
     val images: List<String>,
     val thumbnail: String
-) {
+)  : Serializable {
     var key = -1
     var message = ""
     var state: Int = -1 // -1 = loading, 1 = success, 0 = failed

@@ -1,6 +1,7 @@
 package com.makinul.bs23104.data.model
 
 import com.google.gson.annotations.SerializedName
+import java.io.Serializable
 
 data class Meta(
     @SerializedName("createdAt")
@@ -10,4 +11,4 @@ data class Meta(
     val barcode: String,
     @SerializedName("qrCode")
     val qrCode: String
-)
+) : Serializable

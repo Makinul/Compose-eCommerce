@@ -295,7 +295,7 @@ fun HomeScreen(
     navController: NavController,
     viewModel: MainViewModel = hiltViewModel()
 ) {
-//    val productDataEvent by viewModel.products.collectAsStateWithLifecycle()
+    val productData by viewModel.products.collectAsStateWithLifecycle()
     var currentDataState by remember { mutableStateOf<Data<ProductResponse>>(Data.Loading) }
     val items = remember { mutableStateListOf<Product>() }
     var currentPage by remember { mutableIntStateOf(0) } // Corresponds to initialPage in HomeFragment
@@ -314,93 +314,94 @@ fun HomeScreen(
 //        }
 //    }
 //
-//    // Handle product data events
-//    LaunchedEffect(productDataEvent) {
-//        productDataEvent?.getContentIfNotHandled()?.let { data ->
-//            currentDataState = data // Update current data state for StatusDisplay
-//            isLoading = data is Data.Loading && items.isEmpty()
-//            isLoadingMore = data is Data.Loading && items.isNotEmpty()
+    // Handle product data events
+    LaunchedEffect(productData) {
+        productData.let { data ->
+            currentDataState = data // Update current data state for StatusDisplay
+            isLoading = data is Data.Loading && items.isEmpty()
+            isLoadingMore = data is Data.Loading && items.isNotEmpty()
 //            pullToRefreshState.endRefresh() // Ensure refresh indicator stops
-//
-//            when (data) {
-//                is Data.Success -> {
-//                    val productResponse = data.data
-//                    if (productResponse != null) {
-//                        if (currentPage == 0) { // If it's the first page (after refresh or initial)
-//                            items.clear()
-//                        }
-//
-//                        // Remove old footer if it exists
-//                        items.removeAll { it.key == AppConstants.KEY_FOOTER }
-//                        items.addAll(productResponse.products)
-//
-//                        currentPage++ // Increment page for next fetch
-//
-//                        if (productResponse.products.isEmpty() || items.size >= productResponse.total) {
-//                            items.add(
-//                                Product(
-//                                    key = AppConstants.KEY_FOOTER,
-//                                    message = stringResource(R.string.no_more_data_to_load),
-//                                    state = AppConstants.STATE_NO_MORE_DATA
-//                                )
-//                            )
-//                        } else {
-//                            items.add(
-//                                Product(
-//                                    key = AppConstants.KEY_FOOTER,
-//                                    message = stringResource(R.string.loading_more),
-//                                    state = AppConstants.STATE_LOADING
-//                                )
-//                            )
-//                        }
-//                    } else {
-//                        // Handle null data in success case, perhaps show "no data" footer
-//                        items.removeAll { it.key == AppConstants.KEY_FOOTER }
-//                        items.add(
-//                            Product(
-//                                key = AppConstants.KEY_FOOTER,
-//                                message = stringResource(R.string.no_data_found),
-//                                state = AppConstants.STATE_ERROR
-//                            )
-//                        )
-//                    }
-//                }
-//
-//                is Data.Error -> {
-//                    items.removeAll { it.key == AppConstants.KEY_FOOTER }
-//                    items.add(
-//                        Product(
-//                            key = AppConstants.KEY_FOOTER,
-//                            message = data.message,
-//                            state = AppConstants.STATE_ERROR
-//                        )
-//                    )
-//                }
-//
-//                is Data.Loading -> {
-//                    if (items.none { it.key == AppConstants.KEY_FOOTER }) {
-//                        if (items.isNotEmpty()) { // Only add loading footer if there are items already
-//                            items.add(
-//                                Product(
-//                                    key = AppConstants.KEY_FOOTER,
-//                                    message = stringResource(R.string.loading_more),
-//                                    state = AppConstants.STATE_LOADING
-//                                )
-//                            )
-//                        }
-//                    } else {
-//                        items.indexOfFirst { it.key == AppConstants.KEY_FOOTER }.takeIf { it != -1 }
-//                            ?.let { index ->
-//                                items[index] = items[index].copy(
-//                                    state = AppConstants.STATE_LOADING,
-//                                    message = stringResource(R.string.loading_more)
-//                                )
-//                            }
-//                    }
-//                }
-//            }
-//        }
-//    }
+
+            when (data) {
+                is Data.Success -> {
+                    val productResponse = data.data
+                    if (productResponse != null) {
+                        if (currentPage == 0) { // If it's the first page (after refresh or initial)
+                            items.clear()
+                        }
+
+                        // Remove old footer if it exists
+                        items.removeAll { it.key == AppConstants.KEY_FOOTER }
+                        items.addAll(productResponse.products)
+
+                        currentPage++ // Increment page for next fetch
+
+                        if (productResponse.products.isEmpty() || items.size >= productResponse.total) {
+                            items.add(
+                                Product(
+                                    key = AppConstants.KEY_FOOTER,
+                                    message = "stringResource(R.string.no_more_data_to_load)",
+                                    state = AppConstants.STATE_NO_MORE_DATA
+                                )
+                            )
+                        } else {
+                            items.add(
+                                Product(
+                                    key = AppConstants.KEY_FOOTER,
+                                    message = "stringResource(R.string.loading_more)",
+                                    state = AppConstants.STATE_LOADING
+                                )
+                            )
+                        }
+                    } else {
+                        // Handle null data in success case, perhaps show "no data" footer
+                        items.removeAll { it.key == AppConstants.KEY_FOOTER }
+                        items.add(
+                            Product(
+                                key = AppConstants.KEY_FOOTER,
+                                message = "stringResource(R.string.no_data_found)",
+                                state = AppConstants.STATE_ERROR
+                            )
+                        )
+                    }
+                }
+
+                is Data.Error -> {
+                    items.removeAll { it.key == AppConstants.KEY_FOOTER }
+                    items.add(
+                        Product(
+                            key = AppConstants.KEY_FOOTER,
+                            message = data.message,
+                            state = AppConstants.STATE_ERROR
+                        )
+                    )
+                }
+
+                is Data.Loading -> {
+                    if (items.none { it.key == AppConstants.KEY_FOOTER }) {
+                        if (items.isNotEmpty()) { // Only add loading footer if there are items already
+                            items.add(
+                                Product(
+                                    key = AppConstants.KEY_FOOTER,
+                                    message = "stringResource(R.string.loading_more)",
+                                    state = AppConstants.STATE_LOADING
+                                )
+                            )
+                        }
+                    } else {
+                        items.indexOfFirst { it.key == AppConstants.KEY_FOOTER }.takeIf { it != -1 }
+                            ?.let { index ->
+                                items[index] = Product(
+                                    key = AppConstants.KEY_FOOTER,
+                                    state = AppConstants.STATE_LOADING,
+                                    message = "stringResource(R.string.loading_more)"
+                                )
+                            }
+                    }
+                }
+            }
+        }
+    }
 
     // Initial data load
     LaunchedEffect(Unit) {
