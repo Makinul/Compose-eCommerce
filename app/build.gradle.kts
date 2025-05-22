@@ -1,9 +1,9 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.google.dagger.hilt.android)
     alias(libs.plugins.google.devtools.ksp)
-    alias(libs.plugins.org.jetbrains.kotlin.plugin.compose)
 }
 
 android {
@@ -37,15 +37,12 @@ android {
         jvmTarget = "11"
     }
     buildFeatures {
-        viewBinding = true
         compose = true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = libs.versions.composeCompiler.get()
     }
 }
 
 dependencies {
+    implementation(libs.androidx.core.ktx)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.material3)
@@ -58,28 +55,12 @@ dependencies {
     implementation(libs.androidx.material.icons.extended)
     debugImplementation(libs.androidx.compose.ui.tooling)
 
-    implementation(libs.coil.compose) // Coil for image loading
-
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.material)
-    implementation(libs.androidx.constraintlayout)
-    implementation(libs.androidx.navigation.fragment.ktx)
-    implementation(libs.androidx.navigation.ui.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom)) // Ensure BOM is used for test dependencies too
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
-
-
-    // Swipe Refresh Layout
-    implementation(libs.androidx.swiperefreshlayout)
-
-    // Lifecycle
-    implementation(libs.lifecycle.viewmodel.ktx)
-    implementation(libs.lifecycle.livedata.ktx)
 
     // Hilt DI
     implementation(libs.hilt.android)
@@ -89,12 +70,13 @@ dependencies {
     implementation(libs.coroutines.android)
 
     // Retrofit
-    implementation (libs.retrofit)
-    implementation (libs.google.gson)
-    implementation (libs.okhttp)
-    implementation (libs.okhttp.interceptor)
+    implementation(libs.retrofit)
+    implementation(libs.google.gson)
+    implementation(libs.okhttp)
+    implementation(libs.okhttp.interceptor)
 
-
-    implementation (libs.glide)
-    implementation (libs.lottie)
+    // for image loading and animation
+    implementation(libs.coil.compose)
+    implementation(libs.glide)
+    implementation(libs.lottie)
 }
